@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iOS Menu Support - Lazzeralegend</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #ffffff; color: #000000; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { width: 100%; max-width: 400px; border: 2px solid #000; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #fff; }
+        h2 { text-align: center; font-size: 20px; text-transform: uppercase; }
+        .subtitle { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #000; padding-bottom: 8px; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #000; border-radius: 8px; font-size: 13px; outline: none; }
+        .btn-action { width: 100%; padding: 12px; background-color: #000; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; display: block; }
+        .btn-action:active { opacity: 0.8; }
+        .btn-secondary { background-color: #fff; color: #000; border: 1px solid #000; margin-top: 8px; }
+        .hidden { display: none !important; }
+        
+        .expiry-info { background: #f0f0f0; border: 1px solid #000; border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 12px; }
+        .expiry-info div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        
+        .feature-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #ccc; font-size: 14px; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; border: 1px solid #000; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; border: 1px solid #000; }
+        input:checked + .slider { background-color: #000; }
+        input:checked + .slider:before { transform: translateX(20px); background-color: #fff; }
+
+        .console { background-color: #fff; border: 1px solid #000; border-radius: 8px; padding: 10px; height: 100px; font-family: monospace; font-size: 11px; overflow-y: auto; }
+        .error-msg { color: #d32f2f; font-size: 12px; font-weight: bold; text-align: center; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- BƯỚC 1: KHUNG NHẬP KEY -->
+        <div id="key-screen">
+            <h2>iOS SUPPORT MENU</h2>
+            <div class="subtitle">License Verification</div>
+            <div class="input-group">
+                <input type="text" id="license-key" placeholder="Dán Key chuẩn vào đây...">
+                <button class="btn-action" onclick="verifyAndActivateKey()">KÍCH HOẠT KEY</button>
+                <a href="keygen.html" target="_blank" class="btn-action btn-secondary">LẤY KEY TẠI ĐÂY</a>
+            </div>
+            <div id="key-error" class="error-msg hidden"></div>
+        </div>
+
+        <!-- BƯỚC 2: MENU CHỨC NĂNG -->
+        <div id="menu-screen" class="hidden">
+            <h2>iOS SUPPORT MENU</h2>
+            <div class="subtitle">Lazzeralegend</div>
+
+            <div class="expiry-info">
+                <div><span>Thiết bị:</span> <b id="dev-id">---</b></div>
+                <div><span>Hạn dùng:</span> <b id="exp-date">--/--/----</b></div>
+                <div><span>Còn lại:</span> <b id="exp-countdown" style="color: red;">00h 00m 00s</b></div>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item"><span>Aimlock</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Aimlock')"><span class="slider"></span></label></div>
+                <div class="feature-item"><span>Nhẹ tâm</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Nhe Tam')"><span class="slider"></span></label></div>
+                <div class="feature-item"><span>Bám đầu</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Bam Dau')"><span class="slider"></span></label></div>
+                <div class="feature-item"><span>Đầm tâm</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Dam Tam')"><span class="slider"></span></label></div>
+                <div class="feature-item"><span>Fix rung</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Fix Rung')"><span class="slider"></span></label></div>
+                <div class="feature-item"><span>Fix all</span><label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Fix All')"><span class="slider"></span></label></div>
+            </div>
+
+            <button class="btn-action" style="margin-bottom: 10px;" onclick="startExecution()">KÍCH HOẠT MENU</button>
+            <button class="btn-action btn-secondary" style="margin-bottom: 10px;" onclick="logout()">ĐĂNG XUẤT KEY</button>
+
+            <div class="console" id="console-log">
+                <div>[System] Waiting activation...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Khóa bí mật dùng để xác thực Key chống hack/bừa
+        const SECRET_KEY = "Lazzeralegend_VIP_2026";
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq = 600, duration = 0.08) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function getDeviceId() {
+            let devId = localStorage.getItem("iOS_Device_ID");
+            if (!devId) {
+                devId = "IOS-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                localStorage.setItem("iOS_Device_ID", devId);
+            }
+            return devId;
+        }
+
+        // Hàm kiểm tra tính hợp lệ của Key
+        function validateKeyString(rawKey) {
+            try {
+                const decoded = decodeURIComponent(escape(atob(rawKey)));
+                const parts = decoded.split("|");
+                
+                // Cấu trúc bắt buộc: PREFIX | EXPIRY | DEVICE | SIGNATURE
+                if (parts.length !== 4 || parts[0] !== "LZR") return null;
+
+                const exp = parseInt(parts[1]);
+                const dev = parts[2];
+                const sig = parts[3];
+
+                // Kiểm tra Chữ ký bảo mật (Signature Check)
+                const expectedSig = btoa(SECRET_KEY + "|" + exp + "|" + dev).substring(0, 10);
+                if (sig !== expectedSig) return null; // Key giả/bừa sẽ tạch ở đây
+
+                return { expiryTimestamp: exp, boundDevice: dev };
+            } catch (e) {
+                return null; // Nhập bừa làm lỗi btoa/atob -> Chặn ngay
+            }
+        }
+
+        let countdownTimer = null;
+
+        function checkStoredKey() {
+            const savedKey = localStorage.getItem("ACTIVE_KEY");
+            const myDevId = getDeviceId();
+            
+            if (savedKey) {
+                const keyData = validateKeyString(savedKey);
+                const now = Date.now();
+
+                if (!keyData || now > keyData.expiryTimestamp || (keyData.boundDevice !== "ANY" && keyData.boundDevice !== myDevId)) {
+                    logout();
+                } else {
+                    showMenu(keyData.expiryTimestamp, myDevId);
+                }
+            }
+        }
+
+        function verifyAndActivateKey() {
+            playSound(800, 0.1);
+            const inputKey = document.getElementById('license-key').value.trim();
+            const errorMsg = document.getElementById('key-error');
+            const myDevId = getDeviceId();
+
+            if (!inputKey) {
+                errorMsg.innerText = "Vui lòng nhập Mã Key!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const keyData = validateKeyString(inputKey);
+            const now = Date.now();
+
+            // BẮT BUỘC: Nếu nhập bừa hoặc sai cấu trúc
+            if (!keyData) {
+                errorMsg.innerText = "Mã Key KHÔNG HỢP LỆ! Vui lòng tạo key mới.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (now > keyData.expiryTimestamp) {
+                errorMsg.innerText = "Key này ĐÃ HẾT HẠN!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (keyData.boundDevice !== "ANY" && keyData.boundDevice !== myDevId) {
+                errorMsg.innerText = "Key này đã bị khóa trên THIẾT BỊ KHÁC!";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Khóa key vào thiết bị này
+            let finalKey = inputKey;
+            if (keyData.boundDevice === "ANY") {
+                const sig = btoa(SECRET_KEY + "|" + keyData.expiryTimestamp + "|" + myDevId).substring(0, 10);
+                const boundPayload = `LZR|${keyData.expiryTimestamp}|${myDevId}|${sig}`;
+                finalKey = btoa(unescape(encodeURIComponent(boundPayload)));
+            }
+
+            localStorage.setItem("ACTIVE_KEY", finalKey);
+            errorMsg.classList.add('hidden');
+            showMenu(keyData.expiryTimestamp, myDevId);
+        }
+
+        function showMenu(expTimestamp, devId) {
+            document.getElementById('key-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+            document.getElementById('dev-id').innerText = devId;
+
+            const expDate = new Date(expTimestamp);
+            document.getElementById('exp-date').innerText = expDate.toLocaleDateString('vi-VN') + " " + expDate.toLocaleTimeString('vi-VN');
+
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                const now = Date.now();
+                const diff = expTimestamp - now;
+
+                if (diff <= 0) {
+                    clearInterval(countdownTimer);
+                    alert("Key đã hết hạn sử dụng!");
+                    logout();
+                } else {
+                    const hrs = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    document.getElementById('exp-countdown').innerText = `${hrs}h ${mins}m ${secs}s`;
+                }
+            }, 1000);
+
+            logConsole("[Auth] Access Granted.");
+            logConsole("[System] Welcome Lazzeralegend.");
+        }
+
+        function logout() {
+            localStorage.removeItem("ACTIVE_KEY");
+            if (countdownTimer) clearInterval(countdownTimer);
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('key-screen').classList.remove('hidden');
+            document.getElementById('license-key').value = "";
+        }
+
+        function toggleFeature(cb, name) {
+            playSound(cb.checked ? 1000 : 400, 0.05);
+            logConsole(`[Config] ${name} -> ${cb.checked ? 'ON' : 'OFF'}`);
+        }
+
+        function logConsole(text) {
+            const box = document.getElementById('console-log');
+            const line = document.createElement('div');
+            line.innerText = `> ${text}`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function startExecution() {
+            playSound(1200, 0.15);
+            logConsole("[Process] Injecting modules...");
+            const logs = [
+                "[iOS Core] Attaching processes...",
+                "[Memory] Memory hook applied.",
+                "[Bypass] Anti-cheat patch OK.",
+                "[Success] All features running!"
+            ];
+            logs.forEach((msg, i) => {
+                setTimeout(() => { playSound(500 + i * 100, 0.04); logConsole(msg); }, (i + 1) * 350);
+            });
+        }
+
+        window.onload = checkStoredKey;
+    </script>
+</body>
+</html>
